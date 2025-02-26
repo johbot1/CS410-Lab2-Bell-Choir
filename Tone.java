@@ -107,6 +107,7 @@ enum NoteLength {
 
 enum Note {
     // REST Must be the first 'Note'
+    //A4 MUST be the second 'Note'
     REST,
     A4,
     A4S,

@@ -1,1 +1,1 @@
-# CS410-A-Lab2-Bell-Choir
+# CS410-Lab2-Bell-Choir
