@@ -1,5 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -49,7 +52,8 @@ public class Tone {
         final AudioFormat af =
                 new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
         Tone t = new Tone(af);
-        t.playSong(song);
+//        t.playSong(song);
+        t.readFile("song.txt"); //added file read.
     }
 
     private final AudioFormat af;
@@ -75,6 +79,18 @@ public class Tone {
         final int length = Note.SAMPLE_RATE * ms / 1000;
         line.write(bn.note.sample(), 0, length);
         line.write(Note.REST.sample(), 0, 50);
+    }
+
+    // Method to read a text file and print its contents
+    public void readFile(String filePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
     }
 }
 
@@ -107,7 +123,7 @@ enum NoteLength {
 
 enum Note {
     // REST Must be the first 'Note'
-    //A4 MUST be the second 'Note'
+    // A4 MUST be the second 'Note'
     REST,
     A4,
     A4S,
