@@ -53,7 +53,11 @@ public class Tone {
                 new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
         Tone t = new Tone(af);
 //        t.playSong(song);
-        t.readFile("song.txt"); //added file read.
+        String filePath = "test.txt"; //default
+        if (args.length > 0) {
+            filePath = args[0]; //get file from command line.
+        }
+        t.readFile(filePath);
     }
 
     private final AudioFormat af;
