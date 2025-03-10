@@ -57,7 +57,7 @@ public class Tone {
         if (args.length > 0) {
             filePath = args[0]; //get file from command line.
         }
-        t.readFile(filePath);
+        t.loadSong(filePath);
     }
 
     private final AudioFormat af;
@@ -85,18 +85,53 @@ public class Tone {
         line.write(Note.REST.sample(), 0, 50);
     }
 
+    private boolean validateLine(String line) {
+        String[] parts = line.trim().split("\\s+"); // Split by whitespace
+        if (parts.length != 2) {
+            System.err.println("Invalid line format: " + line);
+            return false;
+        }
+
+        String noteStr = parts[0];
+        String durationStr = parts[1];
+
+        try {
+            Note.valueOf(noteStr); // Check if note is valid enum value
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid note: " + noteStr + " in line: " + line);
+            return false;
+        }
+
+        try {
+            int duration = Integer.parseInt(durationStr);
+            if (duration <= 0) { // Check if duration is positive
+                System.err.println("Invalid duration: " + duration + " in line: " + line);
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid duration format: " + durationStr + " in line: " + line);
+            return false;
+        }
+
+        return true; // Line is valid
+    }
+
     // Method to read a text file and print its contents
-    public void readFile(String filePath) {
+    public void loadSong(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                if (validateLine(line)) {
+                    System.out.println(line); // Print only if valid
+                }
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
         }
     }
 }
+
+
 
 class BellNote {
     final Note note;
