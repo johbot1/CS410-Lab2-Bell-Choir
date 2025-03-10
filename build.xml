@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Tone" default="run" basedir=".">
+<project name="Tone" default="defaultRun" basedir=".">
 
     <property name="src.dir" value="."/>
     <property name="build.dir" value="build"/>
@@ -26,15 +26,22 @@
     </target>
 
     <target name="run" depends="jar">
-        <java jar="${jar.dir}/Tone.jar" fork="true">
-            <arg value="${txt.file}"/>
-        </java>
+        <if>
+            <isset property="txt.file"/>
+            <then>
+                <java jar="${jar.dir}/Tone.jar" fork="true">
+                    <arg value="${txt.file}"/>
+                </java>
+            </then>
+            <else>
+                <echo message="Please specify a file using -Dtxt.file=your_file.txt"/>
+            </else>
+        </if>
     </target>
 
-    <target name="run-default" depends="jar">
+    <target name="defaultRun" depends="jar">
         <java jar="${jar.dir}/Tone.jar" fork="true">
-            <arg value="test.txt"/>
+            <arg value="song.txt"/>
         </java>
     </target>
-
 </project>
