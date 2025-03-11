@@ -10,57 +10,60 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 public class Tone {
+    // List to store loaded
+    private List<BellNote> loadedSong = new ArrayList<>();
+    private final AudioFormat af;
 
-    // Mary had a little lamb
-    private static final List<BellNote> song = new ArrayList<BellNote>() {{
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-        add(new BellNote(Note.F4, NoteLength.QUARTER));
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.A5, NoteLength.HALF));
-
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-        add(new BellNote(Note.G4, NoteLength.HALF));
-
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.A5, NoteLength.HALF));
-
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-        add(new BellNote(Note.F4, NoteLength.QUARTER));
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-        add(new BellNote(Note.A5, NoteLength.QUARTER));
-        add(new BellNote(Note.G4, NoteLength.QUARTER));
-
-        add(new BellNote(Note.F4, NoteLength.WHOLE));
-    }};
+//    // Mary had a little lamb
+//    private static final List<BellNote> song = new ArrayList<BellNote>() {{
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//        add(new BellNote(Note.F4, NoteLength.QUARTER));
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.A5, NoteLength.HALF));
+//
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//        add(new BellNote(Note.G4, NoteLength.HALF));
+//
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.A5, NoteLength.HALF));
+//
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//        add(new BellNote(Note.F4, NoteLength.QUARTER));
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//        add(new BellNote(Note.A5, NoteLength.QUARTER));
+//        add(new BellNote(Note.G4, NoteLength.QUARTER));
+//
+//        add(new BellNote(Note.F4, NoteLength.WHOLE));
+//    }};
 
     public static void main(String[] args) throws Exception {
         final AudioFormat af =
                 new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
         Tone t = new Tone(af);
 //        t.playSong(song);
-        String filePath = "song.txt"; //default
+        String filePath = "song.txt"; //default Mary Had A Little Lamb
         if (args.length > 0) {
-            filePath = args[0]; //get file from command line.
+            filePath = args[0]; //get file from command line args
         }
         t.loadSong(filePath);
+        t.playSong(t.loadedSong);
     }
-
-    private final AudioFormat af;
+    
 
     Tone(AudioFormat af) {
         this.af = af;
@@ -86,7 +89,8 @@ public class Tone {
     }
 
     private boolean validateLine(String line) {
-        String[] parts = line.trim().split("\\s+"); // Split by whitespace
+        // Split by whitespace
+        String[] parts = line.trim().split("\\s+");
         if (parts.length != 2) {
             System.err.println("Invalid line format: " + line);
             return false;
@@ -95,16 +99,21 @@ public class Tone {
         String noteStr = parts[0];
         String durationStr = parts[1];
 
+        // Check if note is valid enum value
+//        System.out.println("Starting note check");
         try {
-            Note.valueOf(noteStr); // Check if note is valid enum value
+            Note.valueOf(noteStr);
         } catch (IllegalArgumentException e) {
             System.err.println("Invalid note: " + noteStr + " in line: " + line);
             return false;
         }
 
+        // Check if duration is positive
+//        System.out.println("End note check");
+//        System.out.println("Starting duration check");
         try {
             int duration = Integer.parseInt(durationStr);
-            if (duration <= 0) { // Check if duration is positive
+            if (duration <= 0) {
                 System.err.println("Invalid duration: " + duration + " in line: " + line);
                 return false;
             }
@@ -112,23 +121,45 @@ public class Tone {
             System.err.println("Invalid duration format: " + durationStr + " in line: " + line);
             return false;
         }
-
-        return true; // Line is valid
+        // Line is valid
+        return true;
     }
 
     // Method to read a text file and print its contents
     public void loadSong(String filePath) {
+        loadedSong.clear();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (validateLine(line)) {
-                    System.out.println(line); // Print only if valid
+                    addNoteToSong(line); // Add valid note to the song
+                    // Print only if valid
+                    System.out.println(line);
                 }
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
         }
     }
+
+    private void addNoteToSong(String line) {
+        String[] parts = line.trim().split("\\s+");
+        Note note = Note.valueOf(parts[0]);
+        int duration = Integer.parseInt(parts[1]);
+        NoteLength length = mapDurationToNoteLength(duration);
+        loadedSong.add(new BellNote(note, length));
+    }
+
+    private NoteLength mapDurationToNoteLength(int duration) {
+        return switch (duration) {
+            case 1 -> NoteLength.WHOLE;
+            case 2 -> NoteLength.HALF;
+            case 4 -> NoteLength.QUARTER;
+            case 8 -> NoteLength.EIGTH;
+            default -> null;
+        };
+    }
+
 }
 
 
