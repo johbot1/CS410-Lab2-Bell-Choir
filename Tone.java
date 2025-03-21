@@ -14,48 +14,10 @@ public class Tone {
     private List<BellNote> loadedSong = new ArrayList<>();
     private final AudioFormat af;
 
-//    // Mary had a little lamb
-//    private static final List<BellNote> song = new ArrayList<BellNote>() {{
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//        add(new BellNote(Note.F4, NoteLength.QUARTER));
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.A5, NoteLength.HALF));
-//
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//        add(new BellNote(Note.G4, NoteLength.HALF));
-//
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.A5, NoteLength.HALF));
-//
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//        add(new BellNote(Note.F4, NoteLength.QUARTER));
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//        add(new BellNote(Note.A5, NoteLength.QUARTER));
-//        add(new BellNote(Note.G4, NoteLength.QUARTER));
-//
-//        add(new BellNote(Note.F4, NoteLength.WHOLE));
-//    }};
-
     public static void main(String[] args) throws Exception {
         final AudioFormat af =
                 new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
         Tone t = new Tone(af);
-//        t.playSong(song);
         String filePath = "song.txt"; //default Mary Had A Little Lamb
         if (args.length > 0) {
             filePath = args[0]; //get file from command line args
@@ -126,8 +88,7 @@ public class Tone {
     }
 
     // Method to read a text file and print its contents
-    public void loadSong(String filePath) {
-        loadedSong.clear();
+    private void loadSong(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -138,7 +99,7 @@ public class Tone {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
+            System.err.println("Error reading file! Cannot load song from file:"+ filePath);
         }
     }
 
