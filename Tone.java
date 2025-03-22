@@ -3,6 +3,7 @@ import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -11,7 +12,7 @@ import javax.sound.sampled.SourceDataLine;
 
 public class Tone {
     // List to store loaded
-    private List<BellNote> loadedSong = new ArrayList<>();
+    private final ConcurrentLinkedQueue<BellNote> songQueue = new ConcurrentLinkedQueue<>();
     private final AudioFormat af;
 
     public static void main(String[] args) throws Exception {
@@ -23,7 +24,7 @@ public class Tone {
             filePath = args[0]; //get file from command line args
         }
         t.loadSong(filePath);
-        t.playSong(t.loadedSong);
+        t.playSong();
     }
     
 
@@ -31,12 +32,13 @@ public class Tone {
         this.af = af;
     }
 
-    void playSong(List<BellNote> song) throws LineUnavailableException {
+    void playSong() throws LineUnavailableException {
         try (final SourceDataLine line = AudioSystem.getSourceDataLine(af)) {
             line.open();
             line.start();
+            BellNote bn;
 
-            for (BellNote bn: song) {
+            while ((bn = songQueue.poll()) != null) { // Poll ensures thread safety
                 playNote(line, bn);
             }
             line.drain();
@@ -93,7 +95,7 @@ public class Tone {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (validateLine(line)) {
-                    addNoteToSong(line); // Add valid note to the song
+                    addNoteToQueue(line); // Add valid note to the song
                     // Print only if valid
                     System.out.println(line);
                 }
@@ -103,13 +105,21 @@ public class Tone {
         }
     }
 
-    private void addNoteToSong(String line) {
+    private void addNoteToQueue(String line) {
         String[] parts = line.trim().split("\\s+");
         Note note = Note.valueOf(parts[0]);
         int duration = Integer.parseInt(parts[1]);
         NoteLength length = mapDurationToNoteLength(duration);
-        loadedSong.add(new BellNote(note, length));
+        songQueue.offer(new BellNote(note, length)); // Enqueue instead of adding to list
     }
+
+//    private void addNoteToSong(String line) {
+//        String[] parts = line.trim().split("\\s+");
+//        Note note = Note.valueOf(parts[0]);
+//        int duration = Integer.parseInt(parts[1]);
+//        NoteLength length = mapDurationToNoteLength(duration);
+//        loadedSong.add(new BellNote(note, length));
+//    }
 
     private NoteLength mapDurationToNoteLength(int duration) {
         return switch (duration) {
