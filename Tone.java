@@ -133,8 +133,6 @@ public class Tone {
 
 }
 
-
-
 class BellNote {
     final Note note;
     final NoteLength length;
