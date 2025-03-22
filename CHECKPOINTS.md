@@ -1,9 +1,9 @@
 # CHECKPOINTS.md
 
-## 1. Setup and Data Handling
-- [ ] 1.1. Ensure `Tone` correctly loads and validates song files
-- [ ] 1.2. Confirm `BellNote` and `NoteLength` correctly map notes and durations
-- [ ] 1.3. Modify `Tone` to store parsed song data in a shared structure
+## 1. Setup and Data Handling ✅
+- [✅] 1.1. Ensure `Tone` correctly loads and validates song files
+- [✅] 1.2. Confirm `BellNote` and `NoteLength` correctly map notes and durations
+- [✅] 1.3. Modify `Tone` to store parsed song data in a shared structure
 
 ## 2. Implement the `Member` Class (Threaded)
 - [ ] 2.1. Create a `Member` class that holds up to two assigned `BellNote`s
