@@ -14,17 +14,17 @@ public class TestMember {
 
         // Create a test member
         Member member1 = new Member("Alice", line, playQueue);
+        //        Debug.printMessage(5,member1.getName(),Note.C4); // Debug
         member1.assignNotes("left", new BellNote(Note.C4, NoteLength.QUARTER));
+        //        Debug.printMessage(5,member1.getName(),Note.E4); // Debug
         member1.assignNotes("right", new BellNote(Note.E4, NoteLength.QUARTER));
 
         // Start the member thread
         member1.start();
 
         // Simulate Conductor cues
-//        Debug.printMessage(5,member1.getName(),Note.E4); // Debug
         playQueue.put(new BellNote(Note.C4, NoteLength.QUARTER)); // Should play
         Thread.sleep(500);
-//        Debug.printMessage(5,member1.getName(),Note.E4); // Debug
         playQueue.put(new BellNote(Note.E4, NoteLength.QUARTER)); // Should play
 
         // Allow time for playback
