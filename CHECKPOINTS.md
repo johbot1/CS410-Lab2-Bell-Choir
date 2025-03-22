@@ -5,10 +5,10 @@
 - [✅] 1.2. Confirm `BellNote` and `NoteLength` correctly map notes and durations
 - [✅] 1.3. Modify `Tone` to store parsed song data in a shared structure
 
-## 2. Implement the `Member` Class (Threaded)
-- [ ] 2.1. Create a `Member` class that holds up to two assigned `BellNote`s
-- [ ] 2.2. Implement a method for `Member` to play a note when signaled
-- [ ] 2.3. Ensure `Member` runs as a separate thread and waits for cues
+## 2. Implement the `Member` Class (Threaded) ✅
+- [✅] 2.1. Create a `Member` class that holds up to two assigned `BellNote`s
+- [✅] 2.2. Implement a method for `Member` to play a note when signaled
+- [✅] 2.3. Ensure `Member` runs as a separate thread and waits for cues
 
 ## 3. Implement the `Conductor` Class (Threaded)
 - [ ] 3.1. Create a `Conductor` class that maintains tempo
