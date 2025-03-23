@@ -39,11 +39,11 @@ public class Member extends Thread{
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 BellNote bn = playQueue.take();  // Blocks until a note is available
-                Debug.printMessage(1,name,bn.note); // Debug
+//                Debug.printMessage(1,name,bn.note); // Debug
                 playNote(bn);
-               Debug.printMessage(2,name,bn.note); // Debug
+//               Debug.printMessage(2,name,bn.note); // Debug
             } catch (InterruptedException e) {
-                Debug.printError(1,name); // Debug
+//                Debug.printError(1,name); // Debug
                 break;  // Exit loop on interrupt
             }
         }
@@ -59,10 +59,10 @@ public class Member extends Thread{
      * leading to sync issues.
      */
     private void playNote(BellNote bn) {
-        Debug.printMessage(3,name,bn.note);
+//        Debug.printMessage(3,name,bn.note); // Debug
         final int ms = Math.min(bn.length.timeMs(), Note.MEASURE_LENGTH_SEC * 1000);
         final int length = Note.SAMPLE_RATE * ms / 1000;
-        Debug.printMessage(4,name,bn.note); // Debug
+//        Debug.printMessage(4,name,bn.note); // Debug
         line.write(bn.note.sample(), 0, length);
         line.write(Note.REST.sample(), 0, 50); // Small pause
     }
