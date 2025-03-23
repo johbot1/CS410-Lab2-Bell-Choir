@@ -14,9 +14,9 @@ public class TestMember {
 
         // Create a test member
         Member member1 = new Member("Alice", line, playQueue);
-        //        Debug.printMessage(5,member1.getName(),Note.C4); // Debug
+                Debug.printMessage(5,member1.getName(),Note.C4); // Debug
         member1.assignNotes("left", new BellNote(Note.C4, NoteLength.QUARTER));
-        //        Debug.printMessage(5,member1.getName(),Note.E4); // Debug
+                Debug.printMessage(5,member1.getName(),Note.E4); // Debug
         member1.assignNotes("right", new BellNote(Note.E4, NoteLength.QUARTER));
 
         // Start the member thread
