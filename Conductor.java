@@ -39,15 +39,27 @@ public class Conductor {
     public void cueMembers(List<BellNote> notes) throws InterruptedException {
         for (BellNote note : notes) {
             System.out.println("Conductor is cuing note: " + note.note);  // Debugging cue
+            boolean noteAssigned = false;
+
             for (Member member : members) {
                 if (memberHasNoteAssigned(member, note)) {
                     playQueue.put(note);  // Add note to the queue for the correct member
                     System.out.println("Conductor cues " + member.getName() + " to play: " + note.note);
-                    Thread.sleep(getBeatLengthMs());  // Wait for the next beat based on tempo
+                    noteAssigned = true;
+                    break;  // Break the loop after finding the member assigned to this note
                 }
             }
+
+            // If no member was assigned to this note, print a warning message
+            if (!noteAssigned) {
+                System.err.println("Warning: No member assigned to play note: " + note.note);
+            }
+
+            // Wait for the next beat based on tempo
+            Thread.sleep(getBeatLengthMs());  // Adjust this for better accuracy
         }
     }
+
 
     /**
      * memberHasNoteAssigned
