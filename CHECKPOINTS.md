@@ -10,10 +10,10 @@
 - [✅] 2.2. Implement a method for `Member` to play a note when signaled
 - [✅] 2.3. Ensure `Member` runs as a separate thread and waits for cues
 
-## 3. Implement the `Conductor` Class (Threaded)
-- [ ] 3.1. Create a `Conductor` class that maintains tempo
-- [ ] 3.2. Implement a method to signal the correct `Member` to play
-- [ ] 3.3. Use `Thread.sleep()` for tempo control and rests
+## 3. Implement the `Conductor` Class (Threaded) ✅
+- [✅] 3.1. Create a `Conductor` class that maintains tempo
+- [✅] 3.2. Implement a method to signal the correct `Member` to play
+- [✅] 3.3. Use `Thread.sleep()` for tempo control and rests
 
 ## 4. Synchronization and Execution Flow
 - [ ] 4.1. Implement a shared queue or signaling mechanism for communication

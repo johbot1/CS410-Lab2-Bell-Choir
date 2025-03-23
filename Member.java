@@ -2,7 +2,6 @@ import javax.sound.sampled.SourceDataLine;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-
 /**
  * Member:
  * Each member will be its own thread,
