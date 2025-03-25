@@ -11,6 +11,11 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+/**
+ * Tone
+ * Acting as our entry point, Tone is responsible for loading a song in from a text file,
+ * parsing the song into BellNote objects, and playing the notes.
+ */
 public class Tone {
     // List to store loaded
     private final ConcurrentLinkedQueue<BellNote> songQueue = new ConcurrentLinkedQueue<>();
