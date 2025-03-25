@@ -1,6 +1,12 @@
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Conductor
+ * The Conductor is responsible for cueing members to play their assigned notes. It loops through
+ * the song's notes, and checks which Member has that note. If a Member has the note, it places it
+ * in the BlockingQueue(playQueue), and after cueing a note, the conductor waits for the next beat
+ */
 public class Conductor {
     private final List<Member> members;  // List of all members
     private final BlockingQueue<BellNote> playQueue;  // Shared queue for signaling members
