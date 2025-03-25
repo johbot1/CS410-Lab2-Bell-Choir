@@ -3,7 +3,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 /**
- * Member:
+ * Member
+ * Storing it's name and notes assigned ot it's left and right hands, a Member will
+ * listen for BellNotes in the BlockingQueue, and play them if they match its assigned
+ * notes. It continuously takes notes from the queue (playQueue.take), blocking until
+ * a note is available. It interrupts and stops only if it catches an InterruptedException.
  * Each member will be its own thread,
  * have 1-2 assigned notes,
  * wait for cues from the Conductor,
@@ -22,8 +26,7 @@ public class Member extends Thread{
         this.playQueue = playQueue;
     }
 
-    public void assignNotes(String hand, BellNote note)
-    {
+    public void assignNotes(String hand, BellNote note) {
         if (!hand.equals("left") && !hand.equals("right")){
             throw new IllegalArgumentException("Invalid hand; Hand must be 'left' or 'right'");
         }
@@ -35,17 +38,28 @@ public class Member extends Thread{
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
+        try {
+            while (!Thread.currentThread().isInterrupted()) {
                 BellNote bn = playQueue.take();  // Blocks until a note is available
-//                Debug.printMessage(1,name,bn.note); // Debug
-                playNote(bn);
-//               Debug.printMessage(2,name,bn.note); // Debug
-            } catch (InterruptedException e) {
-//                Debug.printError(1,name); // Debug
-                break;  // Exit loop on interrupt
+
+                if (bn == null) {  // Termination signal received
+                    System.out.println(name + " received stop signal.");
+                    break;
+                }
+
+                // Check if the member is assigned to this note
+                if (!assignedNotes.containsValue(bn)) {
+                    System.err.println(name + " received an unassigned note: " + bn.note + " - Skipping...");
+                    continue;  // Ignore and keep waiting for a valid note
+                }
+
+                playNote(bn);  // Play the valid assigned note
             }
+        } catch (InterruptedException e) {
+            System.out.println(name + " interrupted.");
+            Thread.currentThread().interrupt(); // Restore interrupt status
         }
+        System.out.println(name + " has finished playing.");
     }
 
     /**
