@@ -39,28 +39,24 @@ public class Member extends Thread{
     @Override
     public void run() {
         try {
-            while (!Thread.currentThread().isInterrupted()) {
-                BellNote bn = playQueue.take();  // Blocks until a note is available
+            while (!Thread.interrupted()) {
+                BellNote noteToPlay = playQueue.take();
+                System.out.println(name + " took " + noteToPlay.note + " from queue.");
 
-                if (bn == null) {  // Termination signal received
-                    System.out.println(name + " received stop signal.");
-                    break;
+
+                if (canPlay(noteToPlay)) {  // Checking if member is assigned to this note
+                    System.out.println(name + " is playing: " + noteToPlay.note);
+                    playNote(noteToPlay);
+                } else {
+                    System.out.println(name + " cannot play: " + noteToPlay.note);
+                    playQueue.put(noteToPlay);  // Put it back for another member
                 }
-
-                // Check if the member is assigned to this note
-                if (!assignedNotes.containsValue(bn)) {
-                    System.err.println(name + " received an unassigned note: " + bn.note + " - Skipping...");
-                    continue;  // Ignore and keep waiting for a valid note
-                }
-
-                playNote(bn);  // Play the valid assigned note
             }
         } catch (InterruptedException e) {
             System.out.println(name + " interrupted.");
-            Thread.currentThread().interrupt(); // Restore interrupt status
         }
-        System.out.println(name + " has finished playing.");
     }
+
 
     /**
      * playNote
@@ -79,4 +75,19 @@ public class Member extends Thread{
         line.write(bn.note.sample(), 0, length);
         line.write(Note.REST.sample(), 0, 50); // Small pause
     }
+
+    public boolean canPlay(BellNote note) {
+        boolean assigned = assignedNotes.containsValue(note);
+        System.out.println(name + " checking if it can play " + note.note + ": " + assigned);
+        return assigned;
+    }
+
+
+
+
+
+
+
+
+
 }
