@@ -46,9 +46,6 @@ public class TestConductor {
 
         conductor.startPerformance(songNotes);
 
-        // Allow time for playback
-        Thread.sleep(3000);
-
         // Interrupt members after performance
         member1.interrupt();
         member2.interrupt();
