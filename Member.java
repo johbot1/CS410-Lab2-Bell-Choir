@@ -2,6 +2,8 @@ import javax.sound.sampled.SourceDataLine;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Member
  * Storing it's name and notes assigned ot it's left and right hands, a Member will
@@ -19,6 +21,8 @@ public class Member extends Thread{
     final Map<String, BellNote> assignedNotes = new HashMap<>(); // "left" and "right" hand notes
     private final SourceDataLine line;  // Audio line for playback
     private final BlockingQueue<BellNote> playQueue; // Receives cues from Conductor
+    private volatile boolean keepRunning = true;
+    private volatile boolean performanceFinished = false;
 
     public Member(String name, SourceDataLine line, BlockingQueue<BellNote> playQueue) {
         this.name = name;
@@ -36,15 +40,31 @@ public class Member extends Thread{
         assignedNotes.put(hand, note);
     }
 
+    public void stopRunning(){
+        this.keepRunning = false;
+    }
+
+    public void setPerformanceFinished() {
+        this.performanceFinished = true;
+    }
+
     @Override
     public void run() {
         try {
-            while (!Thread.interrupted()) {
-                BellNote noteToPlay = playQueue.take();
+            while (keepRunning) {
+                BellNote noteToPlay = playQueue.poll(10, TimeUnit.MILLISECONDS); // Use poll with timeout
+                if (noteToPlay == null) {
+                    // Check if conductor has finished adding notes.
+                    if (performanceFinished && playQueue.isEmpty()) {
+                        System.out.println(name + " detected no more notes and is finishing.");
+                        break; // Exit the loop, ending the thread
+                    }
+                    continue; //if the queue is empty, check again.
+                }
+
                 System.out.println(name + " took " + noteToPlay.note + " from queue.");
 
-
-                if (canPlay(noteToPlay)) {  // Checking if member is assigned to this note
+                if (canPlay(noteToPlay)) {
                     System.out.println(name + " is playing: " + noteToPlay.note);
                     playNote(noteToPlay);
                 } else {
@@ -54,6 +74,8 @@ public class Member extends Thread{
             }
         } catch (InterruptedException e) {
             System.out.println(name + " interrupted.");
+        } finally {
+            System.out.println(name + " thread finished."); // Add this line
         }
     }
 
@@ -81,13 +103,4 @@ public class Member extends Thread{
         System.out.println(name + " checking if it can play " + note.note + ": " + assigned);
         return assigned;
     }
-
-
-
-
-
-
-
-
-
 }
