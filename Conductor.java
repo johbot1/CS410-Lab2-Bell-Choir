@@ -11,6 +11,7 @@ public class Conductor {
     private final List<Member> members;  // List of all members
     private final BlockingQueue<BellNote> playQueue;  // Shared queue for signaling members
     private final int tempoBPM;  // Tempo in Beats Per Minute
+    private volatile boolean performanceFinished = false;
 
     /**
      * Takes a list of Member objects, a BlockingQueue of BellNotes to signal the members, and the tempo in BPM
@@ -86,7 +87,19 @@ public class Conductor {
      * @throws InterruptedException
      */
     public void startPerformance(List<BellNote> songNotes) throws InterruptedException {
-        System.out.println("Conductor starting the performance...");
-        cueMembers(songNotes);  // Cue the members to play the notes in sequence
+        // Calculate delay based on tempo
+        double delayInSeconds = 60.0 / tempoBPM;
+        int delayInMillis = (int) (delayInSeconds * 1000);
+
+        System.out.println("Conductor: Performance started with tempo " + tempoBPM + " BPM, delay = " + delayInMillis + " ms");
+        for (BellNote note : songNotes) {
+            playQueue.put(note);
+            Thread.sleep(delayInMillis); // Use calculated delay
+        }
+        performanceFinished = true;
+        for (Member member : members) {
+            member.setPerformanceFinished();
+        }
+        System.out.println("Conductor: All notes added to queue. Performance finished.");
     }
 }
