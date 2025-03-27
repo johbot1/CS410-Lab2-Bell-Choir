@@ -46,10 +46,16 @@ public class TestConductor {
 
         conductor.startPerformance(songNotes);
 
-        // Interrupt members after performance
-        member1.interrupt();
-        member2.interrupt();
-        member3.interrupt();
+        // Signal to stop
+        member1.stopRunning();
+        member2.stopRunning();
+        member3.stopRunning();
+
+        // Wait for finish
+        member1.join();
+        member2.join();
+        member3.join();
+
         line.drain();
         line.close();
     }
