@@ -55,13 +55,24 @@ public class Conductor extends Thread {
             NoteLength noteLength = bellNote.length;
 
             // Find the member who should play the current note.
+            boolean found = false;
             for (Member member : members) {
                 if (member.getNote() == note) {
                     member.bellTime(noteLength, line); // Tell the member to play.
+                    found = true;
                     break;
                 }
             }
-            Thread.sleep(getBeatLengthMs(noteLength)); // Wait for the duration of the note.
+            if (!found) {
+                System.err.println("Error: No member found for note " + note);
+            }
+            try {
+                Thread.sleep(getBeatLengthMs(noteLength)); // Wait for note duration
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error: Invalid note length detected for " + note);
+            } catch (InterruptedException e) {
+                System.err.println("Conductor interrupted while waiting for note timing.");
+            }
         }
         System.out.println("src.Conductor: All notes played. Performance finished");
     }
