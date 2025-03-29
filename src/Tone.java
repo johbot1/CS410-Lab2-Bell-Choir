@@ -167,6 +167,9 @@ class BellNote {
     final NoteLength length;
 
     BellNote(Note note, NoteLength length) {
+        if (note == null || length == null) {
+            throw new IllegalArgumentException("Invalid BellNote: note or length is null");
+        }
         this.note = note;
         this.length = length;
     }
