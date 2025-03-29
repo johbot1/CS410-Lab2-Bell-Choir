@@ -1,13 +1,14 @@
+package src;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * TestChoir class - Runs a simple test to make sure our Bell Choir is working!
+ * src.TestChoir class - Runs a simple test to make sure our Bell Choir is working!
  */
 public class TestChoir {
 
@@ -41,15 +42,15 @@ public class TestChoir {
                 new BellNote(Note.G4, NoteLength.QUARTER)
         );
 
-        // Start the Conductor - He tells the members when to play.
+        // Start the src.Conductor - He tells the members when to play.
         Conductor conductor = new Conductor(Arrays.asList(member1, member2, member3), 120, song, line); // 120 BPM.
         conductor.start(); // Start the conductor's thread.
 
-        // Wait for Conductor to finish - Don't exit until the song is done.
+        // Wait for src.Conductor to finish - Don't exit until the song is done.
         try {
             conductor.join();
         } catch (InterruptedException e) {
-            System.err.println("Conductor interrupted."); // If something interrupts the conductor.
+            System.err.println("src.Conductor interrupted."); // If something interrupts the conductor.
         }
 
         // Close the audio line - Clean up.

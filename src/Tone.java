@@ -1,3 +1,5 @@
+package src;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedReader;
@@ -10,7 +12,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 /**
- * Tone class - Main class to load and play a song using Members and a Conductor.
+ * src.Tone class - Main class to load and play a song using Members and a src.Conductor.
  */
 public class Tone {
 
@@ -20,7 +22,7 @@ public class Tone {
     // Audio format for playback.
     private final AudioFormat af;
 
-    // List to store Member threads.
+    // List to store src.Member threads.
     private List<Member> members = new ArrayList<>();
 
     /**
@@ -39,7 +41,7 @@ public class Tone {
         }
         t.loadSong(filePath);
 
-        // Initialize Member threads (one per note, excluding REST).
+        // Initialize src.Member threads (one per note, excluding REST).
         t.startMembers();
 
         // Create SourceDataLine for audio playback.
@@ -47,10 +49,10 @@ public class Tone {
             line.open();
             line.start();
 
-            // Create and start Conductor thread.
+            // Create and start src.Conductor thread.
             Conductor conductor = new Conductor(t.members, 120, t.loadedSong, line);
             conductor.start();
-            conductor.join(); // Wait for Conductor to finish.
+            conductor.join(); // Wait for src.Conductor to finish.
 
         } catch (LineUnavailableException e) {
             System.err.println("Line unavailable: " + e.getMessage());
@@ -58,7 +60,7 @@ public class Tone {
     }
 
     /**
-     * Tone constructor.
+     * src.Tone constructor.
      * @param af AudioFormat for playback.
      */
     Tone(AudioFormat af) {
@@ -66,12 +68,12 @@ public class Tone {
     }
 
     /**
-     * Initializes Member threads, one for each Note (excluding REST).
+     * Initializes src.Member threads, one for each src.Note (excluding REST).
      */
     private void startMembers() {
         for (Note note : Note.values()) {
             if (note != Note.REST) { // Skip REST note.
-                members.add(new Member(("Member " + note), null, note, null)); // Create Member for each Note.
+                members.add(new Member(("src.Member " + note), null, note, null)); // Create src.Member for each src.Note.
             }
         }
     }
@@ -142,9 +144,9 @@ public class Tone {
     }
 
     /**
-     * Maps duration to NoteLength enum.
+     * Maps duration to src.NoteLength enum.
      * @param duration Duration value.
-     * @return NoteLength enum value.
+     * @return src.NoteLength enum value.
      */
     private NoteLength mapDurationToNoteLength(int duration) {
         return switch (duration) {
@@ -158,7 +160,7 @@ public class Tone {
 }
 
 /**
- * BellNote class - Represents a musical note with length.
+ * src.BellNote class - Represents a musical note with length.
  */
 class BellNote {
     final Note note;
@@ -171,7 +173,7 @@ class BellNote {
 }
 
 /**
- * NoteLength enum - Represents the duration of a note.
+ * src.NoteLength enum - Represents the duration of a note.
  */
 enum NoteLength {
     WHOLE(1.0f),
@@ -191,7 +193,7 @@ enum NoteLength {
 }
 
 /**
- * Note enum - Represents musical notes.
+ * src.Note enum - Represents musical notes.
  */
 enum Note {
     REST, A4, A4S, B4, C4, C4S, D4, D4S, E4, F4, F4S, G4, G4S, A5;

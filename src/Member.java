@@ -1,20 +1,22 @@
+package src;
+
 import javax.sound.sampled.SourceDataLine;
 
 /**
- * Member
+ * src.Member
  * Represents a member of the bell choir, responsible for playing a specific note.
  * Each member has a name, a note, and a note length.
- * Members play their assigned note when instructed by the Conductor.
+ * Members play their assigned note when instructed by the src.Conductor.
  */
 public class Member extends Thread {
 
-    private final String name; // Name of the Member.
-    private final Note note; // The note assigned to the Member.
+    private final String name; // Name of the src.Member.
+    private final Note note; // The note assigned to the src.Member.
     private NoteLength noteLength; // The duration of the note.
     private volatile boolean keepRunning = true; // Flag to control the thread's execution.
 
     /**
-     * Constructor for the Member class.
+     * Constructor for the src.Member class.
      * @param name The name of the member.
      * @param line The SourceDataLine for audio output.
      * @param note The note the member is assigned to play.
@@ -40,12 +42,12 @@ public class Member extends Thread {
             }
             keepRunning = false; // Stop the thread after the first iteration.
         }
-        System.out.println("Member " + name + " has finished"); // Print a message when the thread finishes.
+        System.out.println("src.Member " + name + " has finished"); // Print a message when the thread finishes.
     }
 
     /**
-     * Plays the Member's note for the specified duration.
-     * @param n The NoteLength to play the note for.
+     * Plays the src.Member's note for the specified duration.
+     * @param n The src.NoteLength to play the note for.
      * @param line The SourceDataLine for audio output.
      */
     public void bellTime(NoteLength n, SourceDataLine line) {
@@ -54,7 +56,7 @@ public class Member extends Thread {
         final int ms = Math.min(noteLength.timeMs(), Note.MEASURE_LENGTH_SEC * 1000);
         final int length = Note.SAMPLE_RATE * ms / 1000;
         line.write(note.sample(), 0, length); // Write the note's audio data to the line.
-//        line.write(Note.REST.sample(), 0, 5); // Adds a small rest after the note. Sounds kinda off?
+//        line.write(src.Note.REST.sample(), 0, 5); // Adds a small rest after the note. Sounds kinda off?
     }
 
     /**

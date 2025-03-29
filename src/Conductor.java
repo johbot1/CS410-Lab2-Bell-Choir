@@ -1,11 +1,13 @@
+package src;
+
 import javax.sound.sampled.SourceDataLine;
 import java.util.List;
 
 /**
- * Conductor
- * The Conductor orchestrates the bell choir, telling members when to play their notes.
+ * src.Conductor
+ * The src.Conductor orchestrates the bell choir, telling members when to play their notes.
  * It iterates through the song's notes, finding the corresponding member and instructing them to play.
- * The Conductor also manages the tempo of the performance.
+ * The src.Conductor also manages the tempo of the performance.
  */
 public class Conductor extends Thread {
 
@@ -15,8 +17,8 @@ public class Conductor extends Thread {
     private final SourceDataLine line; // Audio output line for the members to play on.
 
     /**
-     * Constructor for the Conductor class.
-     * @param members List of Member objects in the choir.
+     * Constructor for the src.Conductor class.
+     * @param members List of src.Member objects in the choir.
      * @param tempoBPM Tempo of the performance in BPM.
      * @param songNotes List of notes in the song.
      * @param line Audio output line.
@@ -37,7 +39,7 @@ public class Conductor extends Thread {
         try {
             playSong();
         } catch (InterruptedException e) {
-            System.out.println("Conductor interrupted when trying to play song");
+            System.out.println("src.Conductor interrupted when trying to play song");
         }
     }
 
@@ -46,7 +48,7 @@ public class Conductor extends Thread {
      * @throws InterruptedException If the thread is interrupted during sleep.
      */
     private void playSong() throws InterruptedException {
-        System.out.println("Conductor: Beginning performance with the tempo " + tempoBPM);
+        System.out.println("src.Conductor: Beginning performance with the tempo " + tempoBPM);
 
         for (BellNote bellNote : songNotes) {
             Note note = bellNote.note;
@@ -61,7 +63,7 @@ public class Conductor extends Thread {
             }
             Thread.sleep(getBeatLengthMs(noteLength)); // Wait for the duration of the note.
         }
-        System.out.println("Conductor: All notes played. Performance finished");
+        System.out.println("src.Conductor: All notes played. Performance finished");
     }
 
     /**
