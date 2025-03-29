@@ -51,6 +51,10 @@ public class Member extends Thread {
      * @param line The SourceDataLine for audio output.
      */
     public void bellTime(NoteLength n, SourceDataLine line) {
+        if (line == null) {
+            System.err.println("Error: Audio line is null for " + name + ". Skipping note.");
+            return;
+        }
         System.out.println(name + " on the... bells: " + note);
         this.noteLength = n;
         final int ms = Math.min(noteLength.timeMs(), Note.MEASURE_LENGTH_SEC * 1000);
