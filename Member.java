@@ -1,106 +1,85 @@
 import javax.sound.sampled.SourceDataLine;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Member
- * Storing it's name and notes assigned ot it's left and right hands, a Member will
- * listen for BellNotes in the BlockingQueue, and play them if they match its assigned
- * notes. It continuously takes notes from the queue (playQueue.take), blocking until
- * a note is available. It interrupts and stops only if it catches an InterruptedException.
- * Each member will be its own thread,
- * have 1-2 assigned notes,
- * wait for cues from the Conductor,
- * and play ONLY their assigned notes
- * @author johnbotonakis
+ * Represents a member of the bell choir, responsible for playing a specific note.
+ * Each member has a name, a note, and a note length.
+ * Members play their assigned note when instructed by the Conductor.
  */
-public class Member extends Thread{
-    private final String name; //Name of the Member
-    final Map<String, BellNote> assignedNotes = new HashMap<>(); // "left" and "right" hand notes
-    private final SourceDataLine line;  // Audio line for playback
-    private final BlockingQueue<BellNote> playQueue; // Receives cues from Conductor
-    private volatile boolean keepRunning = true;
-    private volatile boolean performanceFinished = false;
+public class Member extends Thread {
 
-    public Member(String name, SourceDataLine line, BlockingQueue<BellNote> playQueue) {
-        this.name = name;
-        this.line = line;
-        this.playQueue = playQueue;
-    }
-
-    public void assignNotes(String hand, BellNote note) {
-        if (!hand.equals("left") && !hand.equals("right")){
-            throw new IllegalArgumentException("Invalid hand; Hand must be 'left' or 'right'");
-        }
-        if (assignedNotes.containsKey(hand)){
-            throw new IllegalArgumentException(name + " is already assigned a note in their " + hand + " hand!");
-        }
-        assignedNotes.put(hand, note);
-    }
-
-    public void stopRunning(){
-        this.keepRunning = false;
-    }
-
-    public void setPerformanceFinished() {
-        this.performanceFinished = true;
-    }
-
-    @Override
-    public void run() {
-        try {
-            while (keepRunning) {
-                BellNote noteToPlay = playQueue.poll(10, TimeUnit.MILLISECONDS); // Use poll with timeout
-                if (noteToPlay == null) {
-                    // Check if conductor has finished adding notes.
-                    if (performanceFinished && playQueue.isEmpty()) {
-                        System.out.println(name + " detected no more notes and is finishing.");
-                        break; // Exit the loop, ending the thread
-                    }
-                    continue; //if the queue is empty, check again.
-                }
-
-                System.out.println(name + " took " + noteToPlay.note + " from queue.");
-
-                if (canPlay(noteToPlay)) {
-                    System.out.println(name + " is playing: " + noteToPlay.note);
-                    playNote(noteToPlay);
-                } else {
-                    System.out.println(name + " cannot play: " + noteToPlay.note);
-                    playQueue.put(noteToPlay);  // Put it back for another member
-                }
-            }
-        } catch (InterruptedException e) {
-            System.out.println(name + " interrupted.");
-        } finally {
-            System.out.println(name + " thread finished."); // Add this line
-        }
-    }
-
+    private final String name; // Name of the Member.
+    private final Note note; // The note assigned to the Member.
+    private NoteLength noteLength; // The duration of the note.
+    private volatile boolean keepRunning = true; // Flag to control the thread's execution.
 
     /**
-     * playNote
-     *
-     * @param bn The note to be played
-     * @implNote The reasoning behind putting playNote here instead of Tone is
-     * encapsulation since every member is responsible for their own notes, and
-     * concurrency, since if Tone handled all playback, every member would call a shared method,
-     * leading to sync issues.
+     * Constructor for the Member class.
+     * @param name The name of the member.
+     * @param line The SourceDataLine for audio output.
+     * @param note The note the member is assigned to play.
+     * @param noteLength The initial note length.
      */
-    private void playNote(BellNote bn) {
-//        Debug.printMessage(3,name,bn.note); // Debug
-        final int ms = Math.min(bn.length.timeMs(), Note.MEASURE_LENGTH_SEC * 1000);
-        final int length = Note.SAMPLE_RATE * ms / 1000;
-//        Debug.printMessage(4,name,bn.note); // Debug
-        line.write(bn.note.sample(), 0, length);
-        line.write(Note.REST.sample(), 0, 50); // Small pause
+    public Member(String name, SourceDataLine line, Note note, NoteLength noteLength) {
+        this.name = name;
+        this.note = note;
+        this.noteLength = noteLength;
     }
 
-    public boolean canPlay(BellNote note) {
-        boolean assigned = assignedNotes.containsValue(note);
-        System.out.println(name + " checking if it can play " + note.note + ": " + assigned);
-        return assigned;
+    /**
+     * Overrides the run method of the Thread class.
+     * This method is executed when the thread starts.
+     */
+    @Override
+    public void run() {
+        while (keepRunning) {
+            try {
+                Thread.sleep(10); // Small sleep to avoid busy-waiting.
+            } catch (InterruptedException e) {
+                System.err.println("Thread interrupted!");
+            }
+            keepRunning = false; // Stop the thread after the first iteration.
+        }
+        System.out.println("Member " + name + " has finished"); // Print a message when the thread finishes.
+    }
+
+    /**
+     * Plays the Member's note for the specified duration.
+     * @param n The NoteLength to play the note for.
+     * @param line The SourceDataLine for audio output.
+     */
+    public void bellTime(NoteLength n, SourceDataLine line) {
+        System.out.println(name + " on the... bells: " + note);
+        this.noteLength = n;
+        final int ms = Math.min(noteLength.timeMs(), Note.MEASURE_LENGTH_SEC * 1000);
+        final int length = Note.SAMPLE_RATE * ms / 1000;
+        line.write(note.sample(), 0, length); // Write the note's audio data to the line.
+//        line.write(Note.REST.sample(), 0, 5); // Adds a small rest after the note. Sounds kinda off?
+    }
+
+    /**
+     * Stops the member from playing.
+     */
+    private void stopPlaying() {
+        keepRunning = false;
+    }
+
+    /**
+     * Waits for the member's thread to finish.
+     */
+    public void bellCoalesence() {
+        try {
+            join();
+        } catch (InterruptedException e) {
+            System.out.println(name + " interrupted while trying to coalesce");
+        }
+    }
+
+    /**
+     * Gets the note assigned to the member.
+     * @return The note assigned to the member.
+     */
+    public Note getNote() {
+        return this.note;
     }
 }
