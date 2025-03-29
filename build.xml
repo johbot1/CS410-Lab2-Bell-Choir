@@ -16,7 +16,9 @@
         <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false"/>
     </target>
 
-    <target name="run" depends="compile" description="Run the Tone class with default song.txt">
-        <java classname="src.Tone" classpath="${classes.dir}"/>
+    <target name="run" depends="compile" description="Run the Tone class with song file argument">
+        <java classname="src.Tone" classpath="${classes.dir}">
+            <arg value="${song.file}"/>
+        </java>
     </target>
 </project>
