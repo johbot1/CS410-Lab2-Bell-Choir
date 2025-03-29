@@ -15,12 +15,12 @@
 - [✅] 3.2. Implement a method to signal the correct `Member` to play
 - [✅] 3.3. Use `Thread.sleep()` for tempo control and rests
 
-## 4. Synchronization and Execution Flow
+## 4. Synchronization and Execution Flow ✅
 - [ ✅] 4.1. Implement a shared queue or signaling mechanism for communication
   - [✅] 4.1.1. Implement and End-of-Performance Signal
   - [✅] 4.1.2. Ensure Members Process Notes Continuously
 - [✅] 4.2. Ensure `Conductor` plays notes sequentially, one at a time
-- [ ] 4.3. Test multiple members playing assigned notes without conflicts
+- [✅] 4.3. Test multiple members playing assigned notes without conflicts
 
 ## 5. Final Testing and Refinements
 - [ ] 5.1. Test with multiple song files to ensure compatibility
