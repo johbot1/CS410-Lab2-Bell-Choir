@@ -1,105 +1,75 @@
+import javax.sound.sampled.SourceDataLine;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Conductor
- * The Conductor is responsible for cueing members to play their assigned notes. It loops through
- * the song's notes, and checks which Member has that note. If a Member has the note, it places it
- * in the BlockingQueue(playQueue), and after cueing a note, the conductor waits for the next beat
+ * The Conductor orchestrates the bell choir, telling members when to play their notes.
+ * It iterates through the song's notes, finding the corresponding member and instructing them to play.
+ * The Conductor also manages the tempo of the performance.
  */
-public class Conductor {
-    private final List<Member> members;  // List of all members
-    private final BlockingQueue<BellNote> playQueue;  // Shared queue for signaling members
-    private final int tempoBPM;  // Tempo in Beats Per Minute
-    private volatile boolean performanceFinished = false;
+public class Conductor extends Thread {
+
+    private final List<Member> members;  // List of all members in the choir.
+    private final int tempoBPM;  // Tempo of the performance in Beats Per Minute.
+    private final List<BellNote> songNotes; // List of notes in the song to be played.
+    private final SourceDataLine line; // Audio output line for the members to play on.
 
     /**
-     * Takes a list of Member objects, a BlockingQueue of BellNotes to signal the members, and the tempo in BPM
-     * @param members
-     * @param playQueue
-     * @param tempoBPM
+     * Constructor for the Conductor class.
+     * @param members List of Member objects in the choir.
+     * @param tempoBPM Tempo of the performance in BPM.
+     * @param songNotes List of notes in the song.
+     * @param line Audio output line.
      */
-    public Conductor(List<Member> members, BlockingQueue<BellNote> playQueue, int tempoBPM) {
+    public Conductor(List<Member> members, int tempoBPM, List<BellNote> songNotes, SourceDataLine line) {
         this.members = members;
-        this.playQueue = playQueue;
         this.tempoBPM = tempoBPM;
+        this.songNotes = songNotes;
+        this.line = line;
     }
 
     /**
-     * getBeatLengthMs
-     * This method calculates the length of each beat in milliseconds based on the tempo (BPM).
-     * It divides 60,000 milliseconds (1 minute) by the BPM to get the time for each beat.
-     * @return
+     * Overrides the run method of the Thread class.
+     * Starts the performance by calling the playSong method.
      */
-    private int getBeatLengthMs() {
-        return 60000 / tempoBPM;  // 60,000 ms in a minute divided by BPM
+    @Override
+    public void run() {
+        try {
+            playSong();
+        } catch (InterruptedException e) {
+            System.out.println("Conductor interrupted when trying to play song");
+        }
     }
 
     /**
-     * cueMembers
-     * Cues the members to play their assigned notes; It loops thru each note in the song, and for each note,
-     * it checks which members are assigned to that note. It places the note into the shared Blocking Queue for
-     * that member who has the assignment, then sleeps until the next beat.
-     * @param notes
-     * @throws InterruptedException
+     * Plays the song by instructing members to play their notes at the correct times.
+     * @throws InterruptedException If the thread is interrupted during sleep.
      */
-    public void cueMembers(List<BellNote> notes) throws InterruptedException {
-        for (BellNote note : notes) {
-            System.out.println("Conductor is cuing note: " + note.note);  // Debugging cue
-            boolean noteAssigned = false;
+    private void playSong() throws InterruptedException {
+        System.out.println("Conductor: Beginning performance with the tempo " + tempoBPM);
 
+        for (BellNote bellNote : songNotes) {
+            Note note = bellNote.note;
+            NoteLength noteLength = bellNote.length;
+
+            // Find the member who should play the current note.
             for (Member member : members) {
-                if (memberHasNoteAssigned(member, note)) {
-                    playQueue.put(note);  // Add note to the queue for the correct member
-                    System.out.println("Conductor cues " + member.getName() + " to play: " + note.note);
-                    noteAssigned = true;
-                    break;  // Break the loop after finding the member assigned to this note
+                if (member.getNote() == note) {
+                    member.bellTime(noteLength, line); // Tell the member to play.
+                    break;
                 }
             }
-
-            // If no member was assigned to this note, print a warning message
-            if (!noteAssigned) {
-                System.err.println("Warning: No member assigned to play note: " + note.note);
-            }
-
-            // Wait for the next beat based on tempo
-            Thread.sleep(getBeatLengthMs());  // Adjust this for better accuracy
+            Thread.sleep(getBeatLengthMs(noteLength)); // Wait for the duration of the note.
         }
-    }
-
-
-    /**
-     * memberHasNoteAssigned
-     * A helper method to check if a member has been assigned the note (either in the "left" or "right" hand).
-     * @param member
-     * @param note
-     * @return
-     */
-    private boolean memberHasNoteAssigned(Member member, BellNote note) {
-        // Check if the note is assigned to any of the member's hands (left or right)
-        return member.assignedNotes.containsValue(note);
+        System.out.println("Conductor: All notes played. Performance finished");
     }
 
     /**
-     * startPerformance
-     * This method starts the performance by signaling the members to play the notes in the given order (the song).
-     * @param songNotes
-     * @throws InterruptedException
+     * Calculates the duration of a beat in milliseconds based on the note length.
+     * @param noteLength The length of the note.
+     * @return The duration of the beat in milliseconds.
      */
-    public void startPerformance(List<BellNote> songNotes) throws InterruptedException {
-        // Calculate delay based on tempo
-        double delayInSeconds = 60.0 / tempoBPM;
-        int delayInMillis = (int) (delayInSeconds * 1000);
-
-        System.out.println("Conductor: Performance started with tempo " + tempoBPM + " BPM, delay = " + delayInMillis + " ms");
-        for (BellNote note : songNotes) {
-            playQueue.put(note);
-            Thread.sleep(delayInMillis); // Use calculated delay
-        }
-        performanceFinished = true;
-        for (Member member : members) {
-            member.setPerformanceFinished();
-        }
-        System.out.println("Conductor: All notes added to queue. Performance finished.");
+    private int getBeatLengthMs(NoteLength noteLength) {
+        return noteLength.timeMs();
     }
 }
