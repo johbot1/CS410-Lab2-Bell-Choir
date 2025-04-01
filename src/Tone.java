@@ -12,7 +12,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 /**
- * src.Tone class - Main class to load and play a song using Members and a src.Conductor.
+ * Tone class - Main class to load and play a song using Members and a src.Conductor.
  */
 public class Tone {
 
@@ -34,14 +34,18 @@ public class Tone {
         final AudioFormat af = new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
         Tone t = new Tone(af);
 
-        // Load song from file (default or command-line argument).
-        String filePath = "song.txt"; // Default song file.
-        if (args.length > 0) {
-            filePath = args[0]; // Use command-line argument if provided.
+        // Ensure a file path is provided
+        if (args.length == 0) {
+            System.err.println("Error: No song file provided. Please specify a file path.");
+            return;
         }
+
+        String filePath = args[0];
+
+        // Attempt to load the song
         t.loadSong(filePath);
 
-        // Initialize src.Member threads (one per note, excluding REST).
+        // Initialize Member threads (one per note, excluding REST).
         t.startMembers();
 
         // Create SourceDataLine for audio playback.
@@ -49,10 +53,10 @@ public class Tone {
             line.open();
             line.start();
 
-            // Create and start src.Conductor thread.
+            // Create and start Conductor thread.
             Conductor conductor = new Conductor(t.members, 120, t.loadedSong, line);
             conductor.start();
-            conductor.join(); // Wait for src.Conductor to finish.
+            conductor.join(); // Wait for Conductor to finish.
 
         } catch (LineUnavailableException e) {
             System.err.println("Line unavailable: " + e.getMessage());
@@ -60,7 +64,7 @@ public class Tone {
     }
 
     /**
-     * src.Tone constructor.
+     * Tone constructor.
      * @param af AudioFormat for playback.
      */
     Tone(AudioFormat af) {
@@ -68,80 +72,119 @@ public class Tone {
     }
 
     /**
-     * Initializes src.Member threads, one for each src.Note (excluding REST).
+     * Initializes Member threads, one for each Note (excluding REST).
      */
     private void startMembers() {
         for (Note note : Note.values()) {
             if (note != Note.REST) { // Skip REST note.
-                members.add(new Member(("src.Member " + note), null, note, null)); // Create src.Member for each src.Note.
+                members.add(new Member(("Member " + note), null, note, null)); // Create Member for each Note.
             }
         }
     }
 
     /**
-     * Validates a line from the song file.
+     * Validates a line from the song file and returns an error message if invalid.
      * @param line Line to validate.
-     * @return True if the line is valid, false otherwise.
+     * @return Error message if invalid, null if valid.
      */
-    private boolean validateLine(String line) {
+    private String validateLine(String line) {
         String[] parts = line.trim().split("\\s+");
+
         if (parts.length != 2) {
-            System.err.println("Invalid line format: " + line);
-            return false;
+            return "Invalid format (must be 'NOTE DURATION'): " + line;
         }
 
         String noteStr = parts[0];
         String durationStr = parts[1];
 
-        try {
-            Note.valueOf(noteStr);
-        } catch (IllegalArgumentException e) {
-            System.err.println("Invalid note: " + noteStr + " in line: " + line);
-            return false;
+        // Validate the note
+        if (!isValidNote(noteStr)) {
+            return "Invalid note '" + noteStr + "' in line: " + line;
         }
 
-        try {
-            int duration = Integer.parseInt(durationStr);
-            if (duration <= 0) {
-                System.err.println("Invalid duration: " + duration + " in line: " + line);
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid duration format: " + durationStr + " in line: " + line);
-            return false;
+        // Validate the duration
+        if (!isValidDuration(durationStr)) {
+            return "Invalid duration '" + durationStr + "' in line: " + line;
         }
-        return true;
+
+        return null; // Line is valid
     }
 
     /**
-     * Loads a song from a file.
+     * Checks if the given note exists in the Note enum.
+     */
+    private boolean isValidNote(String noteStr) {
+        try {
+            Note.valueOf(noteStr);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the given duration is a valid integer greater than zero.
+     */
+    private boolean isValidDuration(String durationStr) {
+        try {
+            int duration = Integer.parseInt(durationStr);
+            return duration > 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Loads a song from a file. If any line is invalid, the song is not loaded.
      * @param filePath Path to the song file.
      */
     public void loadSong(String filePath) {
         loadedSong.clear();
+        List<String> errors = new ArrayList<>();
+
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
+            List<BellNote> tempSong = new ArrayList<>(); // Temporary storage
+
             while ((line = reader.readLine()) != null) {
-                if (validateLine(line)) {
-                    addNoteToSong(line);
+                String error = validateLine(line);
+                if (error != null) {
+                    errors.add(error);
+                } else {
+                    tempSong.add(parseBellNote(line));
                 }
             }
+
+            // If there were errors, print them and do NOT load the song
+            if (!errors.isEmpty()) {
+                System.err.println("Error loading song. The following issues were found:");
+                for (String error : errors) {
+                    System.err.println("  - " + error);
+                }
+                return;
+            }
+
+            // No errors, so load the song
+            loadedSong.addAll(tempSong);
+            System.out.println("Song loaded successfully.");
+
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
         }
     }
 
     /**
-     * Adds a note to the loaded song.
-     * @param line Line from the song file.
+     * Parses a valid line into a BellNote.
      */
-    private void addNoteToSong(String line) {
+    private BellNote parseBellNote(String line) {
         String[] parts = line.trim().split("\\s+");
         Note note = Note.valueOf(parts[0]);
         int duration = Integer.parseInt(parts[1]);
         NoteLength length = mapDurationToNoteLength(duration);
-        loadedSong.add(new BellNote(note, length));
+        return new BellNote(note, length);
     }
+
+
 
     /**
      * Maps duration to src.NoteLength enum.
@@ -160,7 +203,7 @@ public class Tone {
 }
 
 /**
- * src.BellNote class - Represents a musical note with length.
+ * BellNote class - Represents a musical note with length.
  */
 class BellNote {
     final Note note;
@@ -176,7 +219,7 @@ class BellNote {
 }
 
 /**
- * src.NoteLength enum - Represents the duration of a note.
+ * NoteLength enum - Represents the duration of a note.
  */
 enum NoteLength {
     WHOLE(1.0f),
@@ -196,7 +239,7 @@ enum NoteLength {
 }
 
 /**
- * src.Note enum - Represents musical notes.
+ * Note enum - Represents musical notes.
  */
 enum Note {
     REST, A4, A4S, B4, C4, C4S, D4, D4S, E4, F4, F4S, G4, G4S, A5;
