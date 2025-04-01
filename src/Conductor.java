@@ -4,7 +4,7 @@ import javax.sound.sampled.SourceDataLine;
 import java.util.List;
 
 /**
- * src.Conductor
+ * Conductor
  * The src.Conductor orchestrates the bell choir, telling members when to play their notes.
  * It iterates through the song's notes, finding the corresponding member and instructing them to play.
  * The src.Conductor also manages the tempo of the performance.
@@ -18,7 +18,7 @@ public class Conductor extends Thread {
 
     /**
      * Constructor for the src.Conductor class.
-     * @param members List of src.Member objects in the choir.
+     * @param members List of Member objects in the choir.
      * @param tempoBPM Tempo of the performance in BPM.
      * @param songNotes List of notes in the song.
      * @param line Audio output line.
@@ -48,8 +48,6 @@ public class Conductor extends Thread {
      * @throws InterruptedException If the thread is interrupted during sleep.
      */
     private void playSong() throws InterruptedException {
-        System.out.println("src.Conductor: Beginning performance with the tempo " + tempoBPM);
-
         for (BellNote bellNote : songNotes) {
             Note note = bellNote.note;
             NoteLength noteLength = bellNote.length;
@@ -74,7 +72,6 @@ public class Conductor extends Thread {
                 System.err.println("Conductor interrupted while waiting for note timing.");
             }
         }
-        System.out.println("src.Conductor: All notes played. Performance finished");
     }
 
     /**
