@@ -30,7 +30,7 @@ to check your installation version: `ant -v` or `ant --version`
 ## Technical Overview
 
 This Lab simulates a bell choir performance, demonstrating multi-threading and concurrency. 
-Acting as our entry point, Tone.java acts as the setup for the file by reading in a musical
+Acting as the entry point, Tone.java acts as the setup for the file by reading in a musical
 text file, and validating the notes. The Member class are representative of a musician, running
 as an independent thread and responsible for playing a singular, specific note. The Conductor acts
 as the director, iterating through the musical sheet, and instructing the Member threads to play
