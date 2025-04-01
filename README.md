@@ -21,9 +21,9 @@ to check your installation version: `ant -v` or `ant --version`
 - Download the files
 - Navigate to the directory you have the files, and run
   the following Ant build command `ant -Dsong.file={name of your song}.txt`
-  - **NOTE:** Please ensure your song text file is in the same directory.
-    - (See the included song files for how to format your song to play properly)
-  - **NOTE:** Please replace "{name of your song}" with the actual name of your song text file.
+  - **NOTE:** To load in songs through a USB the command changes:
+    - If using a Windows machine:  `ant -Dsong.file={name of the USB}:\song.txt`
+    - If using a Linux/macOS machine: `ant -Dsong.file=/Volumes/{name of the USB}/song.txt`
 
 # Explanation of the lab
 
