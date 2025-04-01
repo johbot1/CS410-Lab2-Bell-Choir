@@ -42,7 +42,6 @@ public class Member extends Thread {
             }
             keepRunning = false; // Stop the thread after the first iteration.
         }
-        System.out.println("src.Member " + name + " has finished"); // Print a message when the thread finishes.
     }
 
     /**
@@ -55,7 +54,6 @@ public class Member extends Thread {
             System.err.println("Error: Audio line is null for " + name + ". Skipping note.");
             return;
         }
-        System.out.println(name + " on the... bells: " + note);
         this.noteLength = n;
         final int ms = Math.min(noteLength.timeMs(), Note.MEASURE_LENGTH_SEC * 1000);
         final int length = Note.SAMPLE_RATE * ms / 1000;
