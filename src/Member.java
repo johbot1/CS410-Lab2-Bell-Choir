@@ -3,7 +3,7 @@ package src;
 import javax.sound.sampled.SourceDataLine;
 
 /**
- * src.Member
+ * Member
  * Represents a member of the bell choir, responsible for playing a specific note.
  * Each member has a name, a note, and a note length.
  * Members play their assigned note when instructed by the src.Conductor.
@@ -16,7 +16,7 @@ public class Member extends Thread {
     private volatile boolean keepRunning = true; // Flag to control the thread's execution.
 
     /**
-     * Constructor for the src.Member class.
+     * Constructor for the Member class.
      * @param name The name of the member.
      * @param line The SourceDataLine for audio output.
      * @param note The note the member is assigned to play.
@@ -46,8 +46,8 @@ public class Member extends Thread {
     }
 
     /**
-     * Plays the src.Member's note for the specified duration.
-     * @param n The src.NoteLength to play the note for.
+     * Plays the Member's note for the specified duration.
+     * @param n The NoteLength to play the note for.
      * @param line The SourceDataLine for audio output.
      */
     public void bellTime(NoteLength n, SourceDataLine line) {
