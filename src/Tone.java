@@ -1,5 +1,6 @@
 package src;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedReader;
@@ -142,7 +143,15 @@ public class Tone {
         loadedSong.clear();
         List<String> errors = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        File file = new File(filePath);
+
+        // Check if the file exists and is readable
+        if (!file.exists() || !file.isFile()) {
+            System.err.println("Error: File not found or invalid path: " + filePath);
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             List<BellNote> tempSong = new ArrayList<>(); // Temporary storage
 
@@ -172,6 +181,7 @@ public class Tone {
             System.err.println("Error reading file: " + e.getMessage());
         }
     }
+
 
     /**
      * Parses a valid line into a BellNote.
