@@ -194,8 +194,6 @@ public class Tone {
         return new BellNote(note, length);
     }
 
-
-
     /**
      * Maps duration to src.NoteLength enum.
      * @param duration Duration value.
