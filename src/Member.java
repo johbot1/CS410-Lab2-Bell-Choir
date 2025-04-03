@@ -16,10 +16,11 @@ public class Member extends Thread {
     private final Object lock = new Object(); // Dedicated lock for wait/notify
     private volatile NoteLength noteToPlay = null; // The note length to play currently (volatile for visibility)
     private volatile SourceDataLine audioLine = null; // The line to write to (volatile for visibility)
-    private AtomicBoolean keepRunning = new AtomicBoolean(true); // Use AtomicBoolean for safer flag setting
+    private final AtomicBoolean keepRunning = new AtomicBoolean(true); // Use AtomicBoolean for safer flag setting
 
     /**
      * Constructor for the Member class.
+     *
      * @param name The name of the member.
      * @param note The note the member is assigned to play.
      */
@@ -31,6 +32,7 @@ public class Member extends Thread {
 
     /**
      * Gets the note assigned to the member.
+     *
      * @return The note assigned to the member.
      */
     public Note getNote() {
@@ -99,8 +101,9 @@ public class Member extends Thread {
 
     /**
      * Called by the Conductor to signal this Member to play its note.
+     *
      * @param length The length of the note to play.
-     * @param line The audio line to write to.
+     * @param line   The audio line to write to.
      */
     public void triggerPlay(NoteLength length, SourceDataLine line) {
         synchronized (lock) {
