@@ -65,4 +65,4 @@ it.
 # Sources:
 
 - Google Gemini was used for idea organization (Helping setup CHECKPOINTS.md, guiding my comment process, and 
-how to word things a bit better than simply "It work good")
+how to word things a bit better than simply "It work good" within my PDF)
