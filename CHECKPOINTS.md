@@ -22,9 +22,9 @@
 - [✅] 4.2. Ensure `src.Conductor` plays notes sequentially, one at a time
 - [✅] 4.3. Test multiple members playing assigned notes without conflicts
 
-## 5. Final Testing and Refinements
+## 5. Final Testing and Refinements ✅
 - [✅] 5.1. Test with multiple song files to ensure compatibility
-- [ ] 5.2. Optimize thread synchronization for smoother execution
+- [✅ ] 5.2. Optimize thread synchronization for smoother execution
 - [✅] 5.3. Implement error handling for misassigned notes or timing issues
 - [✅] 5.4  Correctly configured ANT build.xml to be able to play multiple songs 
 
