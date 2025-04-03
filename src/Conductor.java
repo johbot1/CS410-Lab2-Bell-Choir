@@ -12,7 +12,7 @@ import java.util.List;
 public class Conductor extends Thread {
 
     private final List<Member> members;  // List of all members in the choir.
-    private final int tempoBPM;  // Tempo of the performance in Beats Per Minute.
+    private final int tempoBPM;  // Tempo of the performance in Beats Per Minute. Used to calculate sleep durations
     private final List<BellNote> songNotes; // List of notes in the song to be played.
     private final SourceDataLine line; // Audio output line for the members to play on.
 
@@ -24,6 +24,7 @@ public class Conductor extends Thread {
      * @param line Audio output line.
      */
     public Conductor(List<Member> members, int tempoBPM, List<BellNote> songNotes, SourceDataLine line) {
+        super("Conductor-Thread");
         this.members = members;
         this.tempoBPM = tempoBPM;
         this.songNotes = songNotes;
@@ -39,7 +40,12 @@ public class Conductor extends Thread {
         try {
             playSong();
         } catch (InterruptedException e) {
-            System.out.println("src.Conductor interrupted when trying to play song");
+            System.err.println("Conductor interrupted during playSong. Stopping members.");
+            Thread.currentThread().interrupt(); // Reset interrupt status
+            // Ensure members are stopped if conductor is interrupted
+            stopMembers();
+        } finally {
+            System.out.println("Conductor finished conducting members.");
         }
     }
 
@@ -48,28 +54,61 @@ public class Conductor extends Thread {
      * @throws InterruptedException If the thread is interrupted during sleep.
      */
     private void playSong() throws InterruptedException {
+        if (songNotes.isEmpty()) {
+            System.out.println("Conductor: I have no notes to play!");
+            return;
+        }
+        if (songNotes == null) {
+            System.out.println("Conductor: The song has null notes. I cannot play this!.");
+            return;
+        }
+        if (line == null || !line.isOpen()) {
+            System.err.println("Conductor: Audio line is not available. Cannot play song.");
+            return;
+        }
+
         for (BellNote bellNote : songNotes) {
+            // Check for interruption before processing each note
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println("Conductor detected interruption. Stopping song.");
+                throw new InterruptedException("Conductor interrupted.");
+            }
+
             Note note = bellNote.note;
             NoteLength noteLength = bellNote.length;
 
-            // Find the member who should play the current note.
-            boolean found = false;
-            for (Member member : members) {
-                if (member.getNote() == note) {
-                    member.bellTime(noteLength, line); // Tell the member to play.
-                    found = true;
-                    break;
+            if (note == Note.REST) { // Handle rests explicitly
+                // Just wait for the duration of the rest
+            } else {
+                // Find the member who should play the current note.
+                Member targetMember = null;
+                for (Member member : members) {
+                    if (member.getNote() == note) {
+                        targetMember = member;
+                        break;
+                    }
+                }
+
+                if (targetMember != null) {
+                    // Tell the member thread to play the note.
+                    // This call returns immediately, doesn't wait for the note to finish playing.
+                    targetMember.triggerPlay(noteLength, line);
+                } else {
+                    System.err.println("Error: Conductor found no member for note " + note);
                 }
             }
-            if (!found) {
-                System.err.println("Error: No member found for note " + note);
-            }
+
+            // Conductor waits for the note's duration before signaling the next note
+            // This determines the rhythm/tempo of the song.
             try {
-                Thread.sleep(getBeatLengthMs(noteLength)); // Wait for note duration
+                long sleepTime = getBeatLengthMs(noteLength);
+                if (sleepTime > 0) {
+                    Thread.sleep(sleepTime);
+                } else if (sleepTime < 0) {
+                    System.err.println("Warning: Negative sleep time calculated for " + noteLength);
+                }
             } catch (IllegalArgumentException e) {
                 System.err.println("Error: Invalid note length detected for " + note);
-            } catch (InterruptedException e) {
-                System.err.println("Conductor interrupted while waiting for note timing.");
             }
         }
     }
@@ -79,7 +118,18 @@ public class Conductor extends Thread {
      * @param noteLength The length of the note.
      * @return The duration of the beat in milliseconds.
      */
-    private int getBeatLengthMs(NoteLength noteLength) {
+    private long getBeatLengthMs(NoteLength noteLength) {
         return noteLength.timeMs();
+    }
+
+    public void stopMembers() {
+        System.out.println("Conductor signaling members to stop.");
+        if (members != null) {
+            for (Member member : members) {
+                if (member != null) {
+                    member.stopPlaying();
+                }
+            }
+        }
     }
 }
