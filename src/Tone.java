@@ -1,16 +1,15 @@
 package src;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tone class - Main class to load and play a song using Members and a src.Conductor.
@@ -29,38 +28,76 @@ public class Tone {
     /**
      * Main method - Entry point of the program.
      * @param args Command line arguments (optional file path).
-     * @throws Exception If an error occurs during execution.
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) { //
         final AudioFormat af = new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
         Tone t = new Tone(af);
 
-        // Ensure a file path is provided
         if (args.length == 0) {
             System.err.println("Error: No song file provided. Please specify a file path.");
             return;
         }
-
         String filePath = args[0];
 
-        // Attempt to load the song
-        t.loadSong(filePath);
+        try {
+            t.loadSong(filePath);
+            if (t.loadedSong == null) {
+                System.err.println("Error: Song loading failed! Path is null");
+                return;
+            }
+            if (t.loadedSong.isEmpty()) {
+                System.err.println("Error: Song loading failed! Check your pathing, cause there's nothing in here");
+                return;
+            }
 
-        // Initialize Member threads (one per note, excluding REST).
-        t.startMembers();
+            t.startMembers(); // Creates and starts Member threads
+            System.out.println("Begin performance!");
 
-        // Create SourceDataLine for audio playback.
-        try (SourceDataLine line = AudioSystem.getSourceDataLine(af)) {
-            line.open();
-            line.start();
+            Conductor conductor = null;
+            try (SourceDataLine line = AudioSystem.getSourceDataLine(af)) {
+                line.open(af, Note.SAMPLE_RATE); // Specify buffer size?
+                line.start();
 
-            // Create and start Conductor thread.
-            Conductor conductor = new Conductor(t.members, 120, t.loadedSong, line);
-            conductor.start();
-            conductor.join(); // Wait for Conductor to finish.
+                conductor = new Conductor(t.members, 120, t.loadedSong, line); // Example BPM: 120
+                conductor.start(); // Start the Conductor thread
 
-        } catch (LineUnavailableException e) {
-            System.err.println("Line unavailable: " + e.getMessage());
+                conductor.join(); // Wait for Conductor thread to complete its run() method
+
+                // Drain the line to ensure all buffered audio plays
+                line.drain();
+
+            } catch (LineUnavailableException e) {
+                System.err.println("Audio line unavailable");
+            } catch (InterruptedException e) {
+                System.err.println("Main thread interrupted while waiting for Conductor.");
+                if (conductor != null) {
+                    conductor.interrupt(); // Signal conductor to stop if main is interrupted
+                }
+                Thread.currentThread().interrupt();
+            } catch (Exception e) { // Catch other potential exceptions
+                System.err.println("Wow.\nThis goofed up so bad I don't have an error for it.\nHere's the message though: " + e.getMessage());
+            } finally {
+                // --- Cleanup: Ensure all Member threads are stopped and joined ---
+                if (t.members != null) {
+                    for (Member member : t.members) {
+                        if (member != null) {
+                            member.stopPlaying();
+                        }
+                    }
+                }
+
+                if (t.members != null) {
+                    for (Member member : t.members) {
+                        if (member != null && member.isAlive()) { // Only join live threads
+                            member.joinThread(); // Wait for the member thread to finish
+                        }
+                    }
+                }
+                System.out.println("All Member threads joined. The performance has now concluded!");
+            }
+
+        } catch (Exception e) { // Catch errors during setup (loading, starting members)
+            System.err.println("Something went wrong during setup.\n I don't know what, but here's the message: " + e.getMessage());
         }
     }
 
@@ -76,17 +113,21 @@ public class Tone {
      * Initializes Member threads, one for each Note (excluding REST).
      */
     private void startMembers() {
+        System.out.println("Initializing your choir...!");
+        // Assuming Note enum has values like C4, D4 etc.
         for (Note note : Note.values()) {
-            if (note != Note.REST) { // Skip REST note.
-                members.add(new Member(("Member " + note), null, note, null)); // Create Member for each Note.
+            if (note != Note.REST) { // Create a member for each playable note
+                Member member = new Member("Member-" + note.name(), note);
+                members.add(member);
+                member.start(); // START THE THREAD!
             }
         }
     }
 
     /**
-     * Validates a line from the song file and returns an error message if invalid.
+     * Validates a line from the song file and returns an error message if invalid.txt.
      * @param line Line to validate.
-     * @return Error message if invalid, null if valid.
+     * @return Error message if invalid.txt, null if valid.
      */
     private String validateLine(String line) {
         String[] parts = line.trim().split("\\s+");
@@ -136,7 +177,7 @@ public class Tone {
     }
 
     /**
-     * Loads a song from a file. If any line is invalid, the song is not loaded.
+     * Loads a song from a file. If any line is invalid.txt, the song is not loaded.
      * @param filePath Path to the song file.
      */
     public void loadSong(String filePath) {
@@ -147,7 +188,7 @@ public class Tone {
 
         // Check if the file exists and is readable
         if (!file.exists() || !file.isFile()) {
-            System.err.println("Error: File not found or invalid path: " + filePath);
+            System.err.println("Error: File not found or invalid.txt path: " + filePath);
             return;
         }
 
@@ -181,7 +222,6 @@ public class Tone {
             System.err.println("Error reading file: " + e.getMessage());
         }
     }
-
 
     /**
      * Parses a valid line into a BellNote.
